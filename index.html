@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Hand Catch | 伸手接福气</title>
+    <link rel="stylesheet" href="./gesture_control.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=ZCOOL+KuaiLe&family=Noto+Serif+SC:wght@700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <!-- MediaPipe Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- 顶部 HUD (Heads-Up Display) -->
+        <header id="game-hud">
+            <div class="hud-item score-container">
+                <span class="label">福气值</span>
+                <span id="score-value">0</span>
+            </div>
+            <div class="hud-item timer-container">
+                <span class="label" id="timer-label">剩余时间</span>
+                <span id="timer-value">30s</span>
+            </div>
+            <div id="combo-tag" class="hidden">
+                <span class="combo-text">COMBO</span>
+                <span id="combo-count">0</span>
+            </div>
+        </header>
+
+        <!-- 游戏主舞台 -->
+        <main id="viewport-container">
+            <video id="input-video" playsinline></video>
+            <canvas id="output-canvas"></canvas>
+            
+            <!-- 状态覆盖层 -->
+            <div id="game-overlay" class="overlay">
+                <!-- 开始界面 -->
+                <section id="start-screen" class="screen">
+                    <div class="content-wrapper">
+                        <h1 class="main-title">伸手接福气</h1>
+                        <p class="subtitle">AI 视觉实时捕捉，伸出双手接住掉落的幸运！</p>
+                        <button id="start-btn" class="primary-btn">开启福运</button>
+                    </div>
+                </section>
+
+                <!-- 结束界面 -->
+                <section id="end-screen" class="screen hidden">
+                    <div class="content-wrapper">
+                        <h1 class="main-title">福气盈门</h1>
+                        <p class="result-text">本次接福共获得 <span id="final-score">0</span> 分</p>
+                        <button id="restart-btn" class="primary-btn">再接一次</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- 加载动画 -->
+        <div id="loading-overlay">
+            <div class="loader-content">
+                <div class="spinner"></div>
+                <p>正在初始化 AI 引擎...</p>
+            </div>
+        </div>
+
+        <!-- 交互控件 -->
+        <button id="settings-trigger" class="icon-btn" title="游戏设置">⚙️</button>
+
+        <aside id="control-panel" class="hidden">
+            <div class="panel-header">
+                <h3>设置中心</h3>
+                <button id="close-panel" class="close-x">×</button>
+            </div>
+            <div class="panel-body">
+                <div class="setting-group">
+                    <label>字体风格</label>
+                    <select id="font-select">
+                        <option value="'ZCOOL KuaiLe', sans-serif">俏皮可爱 (推荐)</option>
+                        <option value="'Outfit', sans-serif">现代简约</option>
+                        <option value="'Noto Serif SC', serif">典雅衬线</option>
+                        <option value="'Ma Shan Zheng', cursive">手写行楷</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>背景音乐</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="bgm-upload" accept="audio/*">
+                        <span class="file-tip">点击上传自定义音频</span>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>游戏模式 & 时长</label>
+                    <div class="mode-controls">
+                        <div class="input-row">
+                            <input type="number" id="duration-input" value="30" min="5" max="3600">
+                            <span class="unit">秒</span>
+                        </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="endless-mode"> 接福不停 (无尽)
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>福气盒内容 (最多10项)</label>
+                    <div id="gift-box-container" class="gift-grid">
+                        <!-- 由 JS 动态渲染 -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Emoji 库 -->
+        <div id="emoji-picker" class="hidden">
+            <div class="picker-header">
+                <span>选择福气元素</span>
+                <button id="close-picker">×</button>
+            </div>
+            <div class="emoji-grid">
+                <span>🧧</span><span>💰</span><span>🎁</span><span>🏮</span><span>🍊</span><span>🥟</span><span>🌸</span><span>🎋</span><span>🍃</span>
+                <span>💎</span><span>👑</span><span>⭐️</span><span>🔥</span><span>🍀</span><span>🌈</span><span>🌙</span><span>☀️</span><span>🍎</span>
+                <span>🍉</span><span>🍭</span><span>🍕</span><span>🍔</span><span>🍟</span><span>🚀</span><span>🛸</span><span>🎈</span><span>🎊</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 音频资源 -->
+    <audio id="game-bgm" loop></audio>
+    <script src="gesture_control.js"></script>
+</body>
+</html>
